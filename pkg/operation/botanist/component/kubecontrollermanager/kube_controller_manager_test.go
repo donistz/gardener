@@ -939,12 +939,15 @@ func commandForKubernetesVersion(
 		fmt.Sprintf("--horizontal-pod-autoscaler-tolerance=%v", *horizontalPodAutoscalerConfig.Tolerance),
 		"--leader-elect=true",
 		fmt.Sprintf("--node-monitor-grace-period=%s", nodeMonitorGracePeriodSetting),
-		fmt.Sprintf("--pod-eviction-timeout=%s", podEvictionTimeoutSetting),
 		"--root-ca-file=/srv/kubernetes/ca/bundle.crt",
 		"--service-account-private-key-file=/srv/kubernetes/service-account-key/id_rsa",
 		fmt.Sprintf("--service-cluster-ip-range=%s", serviceNetwork.String()),
 		fmt.Sprintf("--secure-port=%d", port),
 	)
+
+	if versionutils.ConstraintK8sLess127.Check(semver.MustParse(version)) {
+		command = append(command, fmt.Sprintf("--pod-eviction-timeout=%s", podEvictionTimeoutSetting))
+	}
 
 	if versionutils.ConstraintK8sLess124.Check(semver.MustParse(version)) {
 		command = append(command, "--port=0")

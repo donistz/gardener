@@ -599,11 +599,6 @@ func (k *kubeControllerManager) computeCommand(port int32) []string {
 		command = append(command, kubernetesutils.FeatureGatesToCommandLineParameter(k.config.FeatureGates))
 	}
 
-	podEvictionTimeout := metav1.Duration{Duration: 2 * time.Minute}
-	if v := k.config.PodEvictionTimeout; v != nil {
-		podEvictionTimeout = *v
-	}
-
 	nodeMonitorGracePeriod := metav1.Duration{Duration: 2 * time.Minute}
 	if v := k.config.NodeMonitorGracePeriod; v != nil {
 		nodeMonitorGracePeriod = *v
@@ -614,12 +609,20 @@ func (k *kubeControllerManager) computeCommand(port int32) []string {
 		fmt.Sprintf("--horizontal-pod-autoscaler-tolerance=%v", *defaultHorizontalPodAutoscalerConfig.Tolerance),
 		"--leader-elect=true",
 		fmt.Sprintf("--node-monitor-grace-period=%s", nodeMonitorGracePeriod.Duration),
-		fmt.Sprintf("--pod-eviction-timeout=%s", podEvictionTimeout.Duration),
 		fmt.Sprintf("--root-ca-file=%s/%s", volumeMountPathCA, secrets.DataKeyCertificateBundle),
 		fmt.Sprintf("--service-account-private-key-file=%s/%s", volumeMountPathServiceAccountKey, secrets.DataKeyRSAPrivateKey),
 		fmt.Sprintf("--service-cluster-ip-range=%s", k.serviceNetwork.String()),
 		fmt.Sprintf("--secure-port=%d", port),
 	)
+
+	if versionutils.ConstraintK8sLess127.Check(k.version) {
+		podEvictionTimeout := metav1.Duration{Duration: 2 * time.Minute}
+		if v := k.config.PodEvictionTimeout; v != nil {
+			podEvictionTimeout = *v
+		}
+
+		command = append(command, fmt.Sprintf("--pod-eviction-timeout=%s", podEvictionTimeout.Duration))
+	}
 
 	if versionutils.ConstraintK8sLess124.Check(k.version) {
 		command = append(command, "--port=0")
