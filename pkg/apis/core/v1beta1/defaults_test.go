@@ -252,7 +252,7 @@ var _ = Describe("Defaults", func() {
 
 				SetObjectDefaults_Shoot(obj)
 
-				Expect(obj.Spec.Kubernetes.KubeControllerManager.NodeMonitorGracePeriod).To(Equal(&metav1.Duration{Duration: 2 * time.Minute}))
+				Expect(obj.Spec.Kubernetes.KubeControllerManager.NodeMonitorGracePeriod).To(Equal(&metav1.Duration{Duration: 40 * time.Second}))
 			})
 
 			Describe("nodeCIDRMaskSize", func() {

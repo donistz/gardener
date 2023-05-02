@@ -490,7 +490,7 @@ Gardener and the upstream Kubernetes already provide recovery mechanism for node
 
 _Machine recovery_
 
-In the seed control plane, `kube-controller-manager` will detect that a node has not renewed its lease and after a timeout (configurable via `--node-monitor-grace-period` flag; `2m0s` by default for Shoot clusters) it will transition the `Node` to `Unknown` state. `machine-controller-manager` will detect that an existing `Node` has transitioned to `Unknown` state and will do the following:
+In the seed control plane, `kube-controller-manager` will detect that a node has not renewed its lease and after a timeout (configurable via `--node-monitor-grace-period` flag; `40s` by default for Shoot clusters) it will transition the `Node` to `Unknown` state. `machine-controller-manager` will detect that an existing `Node` has transitioned to `Unknown` state and will do the following:
 * It will transition the corresponding `Machine` to `Failed` state after waiting for a duration (currently 10 mins, configured via the [--machine-health-timeout](https://github.com/gardener/gardener-extension-provider-gcp/blob/dff3d2417ff732fcce69ba10bbe5d04e13781539/charts/internal/machine-controller-manager/seed/templates/deployment.yaml#L49) flag).
 * Thereafter, a `deletion timestamp` will be put on this machine. This indicates that the machine is now going to be terminated, transitioning the machine to `Terminating` state.
 * It attempts to drain the node first and if it is unable to do so, then currently after a period of 2 hours (configurable via [--machine-drain-timeout](https://github.com/gardener/gardener-extension-provider-gcp/blob/dff3d2417ff732fcce69ba10bbe5d04e13781539/charts/internal/machine-controller-manager/seed/templates/deployment.yaml#L48)), it will attempt to force-delete the `Machine` and create a new one. Draining a node will be skipped if certain conditions are met, e.g., the node is in `NotReady` state, the node condition reported by `node-problem-detector` is `ReadonlyFilesystem`, etc.
@@ -530,7 +530,7 @@ _Pros:_
 * Less complex to implement since no dynamic rebalancing of pods is required and there is no need to determine if there is an AZ outage.
 * Additional cost to host an HA shoot control plane is kept to the bare minimum.
 * Existing recovery mechanisms are leveraged:
-  * For the affected Deployment Pods, the `kube-controller-manager` will create new replicas after the affected replicas are terminating. `kube-controller-manager` starts terminating the affected replicas after `7min` by default - `--node-monitor-grace-period` (`2min` by default) + `--default-not-ready-toleration-seconds`/`default-unreachable-toleration-seconds` (`300s` by default). The newly created Pods will be scheduled on healthy Nodes and will start successfully.
+  * For the affected Deployment Pods, the `kube-controller-manager` will create new replicas after the affected replicas are terminating. `kube-controller-manager` starts terminating the affected replicas after `5min40s` by default - `--node-monitor-grace-period` (`40s` by default) + `--default-not-ready-toleration-seconds`/`default-unreachable-toleration-seconds` (`300s` by default). The newly created Pods will be scheduled on healthy Nodes and will start successfully.
 
 _Cons:_
 * Existing recovery mechanisms are leveraged:

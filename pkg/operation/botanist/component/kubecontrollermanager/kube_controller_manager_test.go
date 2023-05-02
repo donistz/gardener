@@ -929,7 +929,7 @@ func commandForKubernetesVersion(
 		podEvictionTimeoutSetting = podEvictionTimeout.Duration.String()
 	}
 
-	nodeMonitorGracePeriodSetting := "2m0s"
+	nodeMonitorGracePeriodSetting := "40s"
 	if nodeMonitorGracePeriod != nil {
 		nodeMonitorGracePeriodSetting = nodeMonitorGracePeriod.Duration.String()
 	}

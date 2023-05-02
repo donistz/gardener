@@ -599,7 +599,7 @@ func (k *kubeControllerManager) computeCommand(port int32) []string {
 		command = append(command, kubernetesutils.FeatureGatesToCommandLineParameter(k.config.FeatureGates))
 	}
 
-	nodeMonitorGracePeriod := metav1.Duration{Duration: 2 * time.Minute}
+	nodeMonitorGracePeriod := metav1.Duration{Duration: 40 * time.Second}
 	if v := k.config.NodeMonitorGracePeriod; v != nil {
 		nodeMonitorGracePeriod = *v
 	}
